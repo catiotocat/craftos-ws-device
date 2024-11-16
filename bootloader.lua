@@ -22,7 +22,7 @@ if bootloader then
 	btld.close()
 	if x ~= y then
 		shell.run("bootloader")
-		return end
+		return
 	end
 end
 
