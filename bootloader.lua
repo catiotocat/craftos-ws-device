@@ -1,6 +1,6 @@
 local resoniteLink, err = http.get("https://raw.githubusercontent.com/catiotocat/craftos-ws-device/refs/heads/main/resoniteLink.lua")
 local bootloader, err = http.get("https://raw.githubusercontent.com/catiotocat/craftos-ws-device/refs/heads/main/bootloader.lua")
--- pastebin run ur887zZj
+-- pastebin run KcZ2PstM
 if resoniteLink then
 	local rslnk = fs.open("resoniteLink.lua","w")
 	rslnk.write(resoniteLink.readAll())
@@ -10,6 +10,7 @@ end
 if bootloader then
 	local original = fs.open("bootloader.lua","r")
 	local y = bootloader.readAll()
+	x = y
 	if original then
 		local x = original.readAll()
 		original.close()
