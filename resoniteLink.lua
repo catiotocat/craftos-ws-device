@@ -517,6 +517,8 @@ while running do
 		term.clear()
         xsize = xsize2
         ysize = ysize2
+		monitor.setBackgroundColor(colors.black)
+		monitor.clear()
         sendCMD("0")
         apiRequest()
     end
