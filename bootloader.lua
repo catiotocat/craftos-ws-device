@@ -1,4 +1,6 @@
+print("Updating...")
 local resoniteLink, err = http.get("https://raw.githubusercontent.com/catiotocat/craftos-ws-device/refs/heads/main/resoniteLink.lua")
+sleep(1)
 local bootloader, err = http.get("https://raw.githubusercontent.com/catiotocat/craftos-ws-device/refs/heads/main/bootloader.lua")
 -- pastebin run tUPXJMrn
 if resoniteLink then
@@ -20,6 +22,7 @@ if bootloader then
 	btld.close()
 	if x ~= y then
 		shell.run("bootloader")
+		return end
 	end
 end
 
