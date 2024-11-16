@@ -24,6 +24,16 @@ term.setPaletteColor(colors.yellow,0xFFFF00)
 term.setPaletteColor(colors.white,0xFFFFFF)
 term.setPaletteColor(colors.black,0x000000)
 
+function apiRequest()
+	term.setCursorPos(xsize-10,1)
+	term.setBackgroundColor(colors.black)
+	term.setTextColor(gateColor)
+	write("REFRESHING")
+	term.setBackgroundColor(gateColor)
+	write(" ")
+	http.request("https://api.rxserver.net/stargates")
+end
+
 function writeADDR(addr,type,headless,open,iris,id)
     term.setCursorPos(xsize-10,id)
     if addr == gateAddr then
@@ -479,7 +489,7 @@ function mouseHandle(x,y)
 		end
     else
         if y < 2 then
-            http.request("https://api.rxserver.net/stargates")
+            apiRequest()
             return 
         end
         local addr = addrBK[y-1]
@@ -494,7 +504,7 @@ function mouseHandle(x,y)
 end
 running = true
 -- sendCMD("0") -- query
-http.request("https://api.rxserver.net/stargates")
+apiRequest()
 os.startTimer(30)
 while running do
     monitor.setBackgroundColor(colors.black)
@@ -508,7 +518,7 @@ while running do
         xsize = xsize2
         ysize = ysize2
         sendCMD("0")
-        http.request("https://api.rxserver.net/stargates")
+        apiRequest()
     end
     redrawMonitor()
     if dat[1] == "websocket_message" then
@@ -518,7 +528,7 @@ while running do
     elseif dat[1]=="mouse_click" and not monitorActive then
         mouseHandle(dat[3],dat[4])
     elseif dat[1]=="timer" then
-        http.request("https://api.rxserver.net/stargates")
+        apiRequest()
         os.startTimer(30)
     elseif dat[1]=="key" and monitorActive then
         keyParse(dat[2])
