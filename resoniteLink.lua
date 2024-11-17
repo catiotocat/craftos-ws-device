@@ -24,6 +24,9 @@ term.setPaletteColor(colors.yellow,0xFFFF00)
 term.setPaletteColor(colors.white,0xFFFFFF)
 term.setPaletteColor(colors.black,0x000000)
 
+local args = {...}
+arg = args[1]
+
 function apiRequest()
 	term.setCursorPos(xsize-10,1)
 	term.setBackgroundColor(colors.black)
@@ -248,37 +251,43 @@ function parseWS(json)
         buttonPOS.gdo = nil
     end
 	
-	term.setCursorPos(1,currenty)
-    term.setTextColor(colors.black)
-    term.setBackgroundColor(gateColor)
-    write("IDC PAYLOAD UNIT")
-    term.setTextColor(gateColor)
-    term.setBackgroundColor(colors.black)
-    currenty = currenty+1
-	
-	term.setCursorPos(1,currenty)
-    write("TARGET ADDR: "..string.sub(x.payloadAddr,1,6))
-    term.setTextColor(colors.green)
-	write(string.sub(x.payloadAddr,7,8))
-    term.setTextColor(gateColor)
-	buttonPOS.payloadAddr = currenty
-    currenty = currenty+1
-	
-	term.setCursorPos(1,currenty)
-    write("PAYLOAD DAT: "..string.sub(x.payloadData,1,6))
-    term.setTextColor(colors.green)
-	write(string.sub(x.payloadData,7,8))
-    term.setTextColor(gateColor)
-	buttonPOS.payloadData = currenty
-    currenty = currenty+1
-	
-	if not x.active then
+	if arg then
 		term.setCursorPos(1,currenty)
-		write("SEND PAYLOAD")
+		term.setTextColor(colors.black)
+		term.setBackgroundColor(gateColor)
+		write("IDC PAYLOAD UNIT")
 		term.setTextColor(gateColor)
-		buttonPOS.sendPayload = currenty
+		term.setBackgroundColor(colors.black)
 		currenty = currenty+1
+		
+		term.setCursorPos(1,currenty)
+		write("TARGET ADDR: "..string.sub(x.payloadAddr,1,6))
+		term.setTextColor(colors.green)
+		write(string.sub(x.payloadAddr,7,8))
+		term.setTextColor(gateColor)
+		buttonPOS.payloadAddr = currenty
+		currenty = currenty+1
+		
+		term.setCursorPos(1,currenty)
+		write("PAYLOAD DAT: "..string.sub(x.payloadData,1,6))
+		term.setTextColor(colors.green)
+		write(string.sub(x.payloadData,7,8))
+		term.setTextColor(gateColor)
+		buttonPOS.payloadData = currenty
+		currenty = currenty+1
+		
+		if not x.active then
+			term.setCursorPos(1,currenty)
+			write("SEND PAYLOAD")
+			term.setTextColor(gateColor)
+			buttonPOS.sendPayload = currenty
+			currenty = currenty+1
+		else
+			buttonPOS.sendPayload = nil
+		end
 	else
+		buttonPOS.payloadAddr = nil
+		buttonPOS.payloadData = nil
 		buttonPOS.sendPayload = nil
 	end
 	
