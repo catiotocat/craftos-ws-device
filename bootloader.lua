@@ -43,7 +43,7 @@ if bootloader then
 		print("Bootloader Updated!")
 		sleep(1)
 		shell.run("bootloader",arg)
-		return
+		break
 	end
 else
 	printError("Bootloader Update Error: "..err2)
