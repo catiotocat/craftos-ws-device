@@ -32,15 +32,15 @@ arg = args[1]
 if bootloader then
 	local original = fs.open("bootloader.lua","r")
 	local y = bootloader.readAll()
-	x = y
+	local x = ""
 	if original then
-		local x = original.readAll()
+		x = original.readAll()
 		original.close()
 	end
 	local btld = fs.open("bootloader.lua","w")
 	btld.write(y)
 	btld.close()
-	if x ~= y or not original then
+	if x ~= y then
 		print("Bootloader Updated!")
 		sleep(1)
 		shell.run("bootloader",arg)
