@@ -5,8 +5,12 @@ local bootloader, err2 = http.get("https://raw.githubusercontent.com/catiotocat/
 -- pastebin run tUPXJMrn
 if resoniteLink then
 	local rslnk = fs.open("resoniteLink.lua","r")
-	dat = rslnk.readAll()
-	rslnk.close()
+	if not rslnk then
+		dat = ""
+	else
+		dat = rslnk.readAll()
+		rslnk.close()
+	end
 	local rslnk = fs.open("resoniteLink.lua","w")
 	new = resoniteLink.readAll()
 	rslnk.write(new)
@@ -33,7 +37,7 @@ if bootloader then
 	local btld = fs.open("bootloader.lua","w")
 	btld.write(y)
 	btld.close()
-	if x ~= y then
+	if x ~= y or not original then
 		print("Bootloader Updated!")
 		sleep(1)
 		shell.run("bootloader",arg)
