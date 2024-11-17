@@ -1,7 +1,7 @@
 print("Checking for Updates...")
-local resoniteLink, err = http.get("https://raw.githubusercontent.com/catiotocat/craftos-ws-device/refs/heads/main/resoniteLink.lua")
+local resoniteLink, err1 = http.get("https://raw.githubusercontent.com/catiotocat/craftos-ws-device/refs/heads/main/resoniteLink.lua")
 sleep(1)
-local bootloader, err = http.get("https://raw.githubusercontent.com/catiotocat/craftos-ws-device/refs/heads/main/bootloader.lua")
+local bootloader, err2 = http.get("https://raw.githubusercontent.com/catiotocat/craftos-ws-device/refs/heads/main/bootloader.lua")
 -- pastebin run tUPXJMrn
 if resoniteLink then
 	local rslnk = fs.open("resoniteLink.lua","r")
@@ -14,6 +14,8 @@ if resoniteLink then
 	if dat ~= new then
 		print("Program Updated!")
 	end
+else
+	printError("Program Update Error: "..err1)
 end
 
 local args = {...}
@@ -37,6 +39,8 @@ if bootloader then
 		shell.run("bootloader",arg)
 		return
 	end
+else
+	printError("Bootloader Update Error: "..err2)
 end
 
 
