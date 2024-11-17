@@ -33,6 +33,7 @@ if bootloader then
 	btld.close()
 	if x ~= y then
 		print("Bootloader Updated!")
+		sleep(1)
 		shell.run("bootloader",arg)
 		return
 	end
