@@ -1,5 +1,6 @@
 repeat
-
+term.setTextColor(colors.cyan)
+term.setBackgroundColor(colors.black)
 print("Checking for Updates...")
 local resoniteLink, err1 = http.get("https://raw.githubusercontent.com/catiotocat/craftos-ws-device/refs/heads/main/resoniteLink.lua")
 sleep(1)
