@@ -1,3 +1,5 @@
+repeat
+
 print("Checking for Updates...")
 local resoniteLink, err1 = http.get("https://raw.githubusercontent.com/catiotocat/craftos-ws-device/refs/heads/main/resoniteLink.lua")
 sleep(1)
@@ -48,9 +50,8 @@ else
 end
 
 
-repeat
 	print("Running Program")
 	sleep(1)
     shell.run("resoniteLink",arg)
-    sleep(10)
+    sleep(2)
 until false
