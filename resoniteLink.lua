@@ -251,7 +251,7 @@ function parseWS(json)
         buttonPOS.gdo = nil
     end
 	
-	if not arg then
+	if arg then
 		term.setCursorPos(1,currenty)
 		term.setTextColor(colors.black)
 		term.setBackgroundColor(gateColor)
