@@ -18,6 +18,8 @@ targetAddr = ""
 idcCode = ""
 payloadAddr = ""
 payloadData = ""
+activeSlot = 1
+slotColors = {colors.brown,colors.lime,colors.magenta}
 term.setPaletteColor(colors.green,0x00FF00)
 term.setPaletteColor(colors.red,0xFF0000)
 term.setPaletteColor(colors.yellow,0xFFFF00)
@@ -37,29 +39,59 @@ function apiRequest()
 	http.request("https://api.rxserver.net/stargates")
 end
 
-function writeADDR(addr,type,headless,open,iris,id)
+function writeADDR(addr,type,headless,open,iris,id,isWS)
     term.setCursorPos(xsize-10,id)
-    if addr == gateAddr then
-        term.setBackgroundColor(colors.yellow)
-    elseif headless then
-        term.setBackgroundColor(colors.green)
-    else
-        term.setBackgroundColor(colors.red)
-    end
-    write(" ")
-    term.setBackgroundColor(colors.black)
-    term.setTextColor(gateColor)
-    write(addr)
-    term.setTextColor(colors.green)
-    term.setBackgroundColor(colors.black)
-    write(type)
-    if iris and open then
-        term.setBackgroundColor(colors.red)
-    elseif open then
-        term.setBackgroundColor(colors.green)
-    else
-        term.setBackgroundColor(colors.black)
-    end
+	if isWS then
+		if isWS == activeSlot then
+			term.setBackgroundColor(colors.yellow)
+		else
+			term.setBackgroundColor(colors.green)
+		end
+		write(" ")
+		term.setBackgroundColor(colors.black)
+		if type == "1 " then
+			term.setTextColor(colors.red)
+			write(addr)
+		elseif type == "2 " then
+			term.setTextColor(slotColors[isWS])
+			write(addr)
+		else
+			term.setTextColor(slotColors[isWS])
+			write(addr)
+			term.setTextColor(colors.green)
+		end
+		term.setBackgroundColor(colors.black)
+		write(type)
+		if iris and open then
+			term.setBackgroundColor(colors.red)
+		elseif open then
+			term.setBackgroundColor(colors.green)
+		else
+			term.setBackgroundColor(colors.black)
+		end
+	else
+		if addr == gateAddr then
+			term.setBackgroundColor(colors.yellow)
+		elseif headless then
+			term.setBackgroundColor(colors.green)
+		else
+			term.setBackgroundColor(colors.red)
+		end
+		write(" ")
+		term.setBackgroundColor(colors.black)
+		term.setTextColor(gateColor)
+		write(addr)
+		term.setTextColor(colors.green)
+		term.setBackgroundColor(colors.black)
+		write(type)
+		if iris and open then
+			term.setBackgroundColor(colors.red)
+		elseif open then
+			term.setBackgroundColor(colors.green)
+		else
+			term.setBackgroundColor(colors.black)
+		end
+	end
     write(" ")
 end
 	
@@ -68,7 +100,7 @@ function parseAPI(json)
     term.setBackgroundColor(colors.black)
     term.setTextColor(gateColor)
 	write("GATE LIST ")
-    for i=2,ysize do
+    for i=2,ysize-3 do
         term.setCursorPos(xsize-10,i)
         write(string.rep(" ",10))
     end   
@@ -91,231 +123,257 @@ end
 function parseWS(json)
     local x, err = textutils.unserializeJSON(json)
     if not x then return end
-	if x.user == "websocket" then 
-		typeCode = ""
-		gateAddr = ""
-		payloadAddr = ""
-		payloadData = ""
+	if not x.slot then x.slot = 1 end
+	term.setPaletteColor(slotColors[x.slot],tonumber(x.gateCOL,16))
+	local ypos = ysize-3+x.slot
+	local slotAddress = ""
+	local slotType = ""
+	local slotOpen = false
+	local slotIris = false
+	if x.user == "websocket" then
+		slotAddress = "ERROR "
+		slotType = "1 "
+		writeADDR(slotAddress,slotType,true,slotOpen,slotIris,ypos,x.slot)
+	elseif x.user == "catio headless" and x.addr then
+		if x.addr == "" then
+			slotAddress = "ERROR "
+			slotType = "2 "
+		else
+			slotAddress = x.addr
+			slotType = x.group
+			slotOpen = x.locked
+			slotIris = x.irisClose
+		end
+		writeADDR(slotAddress,slotType,true,slotOpen,slotIris,ypos,x.slot)
+	end
+	if x.slot == activeSlot then
+		if x.user == "websocket" then 
+			typeCode = ""
+			gateAddr = ""
+			payloadAddr = ""
+			payloadData = ""
+			term.setBackgroundColor(colors.black)
+			for i=1,ysize-3 do
+				term.setCursorPos(1,i)
+				write(string.rep(" ",xsize-11))
+			end
+			term.setTextColor(colors.red)
+			term.setCursorPos(1,1)
+			write("ERROR 1")
+			term.setCursorPos(1,2)
+			write("Headless is Offline!")
+			buttonPOS = {refresh=1}
+			term.setPaletteColor(gateColor,term.nativePaletteColor(gateColor))
+		end
+		if x.user ~= "catio headless" then return end
+		term.setPaletteColor(gateColor,tonumber(x.gateCOL,16))
+		if not x.addr then return end
+		if x.addr == "" then
+			typeCode = ""
+			gateAddr = ""
+			payloadAddr = ""
+			payloadData = ""
+			term.setBackgroundColor(colors.black)
+			for i=1,ysize-3 do
+				term.setCursorPos(1,i)
+				write(string.rep(" ",xsize-11))
+			end
+			term.setTextColor(colors.red)
+			term.setCursorPos(1,1)
+			write("ERROR 2")
+			term.setCursorPos(1,2)
+			write("Stargate not Ready!")
+			buttonPOS = {refresh=1}
+			return
+		end
+		typeCode = x.group
+		gateAddr = x.addr
+		targetAddr = x.target
+		idcCode = x.idcCODE
+		payloadAddr = x.payloadAddr
+		payloadData = x.payloadData
+		term.setTextColor(gateColor)
 		term.setBackgroundColor(colors.black)
 		for i=1,ysize-3 do
 			term.setCursorPos(1,i)
 			write(string.rep(" ",xsize-11))
 		end
-		term.setTextColor(colors.red)
-		term.setCursorPos(1,1)
-		write("ERROR 1")
-		term.setCursorPos(1,2)
-		write("Headless is Offline!")
-		buttonPOS = {refresh=1}
-		term.setPaletteColor(gateColor,term.nativePaletteColor(gateColor))
-	end
-    if x.user ~= "catio headless" then return end
-    term.setPaletteColor(gateColor,tonumber(x.gateCOL,16))
-	if not x.addr then return end
-	if x.addr == "" then
-		typeCode = ""
-		gateAddr = ""
-		payloadAddr = ""
-		payloadData = ""
-		term.setBackgroundColor(colors.black)
-		for i=1,ysize-3 do
-			term.setCursorPos(1,i)
-			write(string.rep(" ",xsize-11))
+		local currenty = 1
+		if x.irisPresent then
+			term.setCursorPos(1,currenty)
+			term.setTextColor(colors.black)
+			term.setBackgroundColor(gateColor)
+			term.write("IRIS CONTROLS")
+			term.setTextColor(gateColor)
+			term.setBackgroundColor(colors.black)
+			currenty = currenty+1
+			
+			term.setCursorPos(1,currenty)
+			term.write("IDC ENABLE ")
+			if x.idcEN then
+				term.setBackgroundColor(colors.green)
+			else
+				term.setBackgroundColor(colors.red)
+			end
+			write(" ")
+			term.setBackgroundColor(colors.black)
+			buttonPOS.idcEN = currenty
+			currenty = currenty+1
+			
+			term.setCursorPos(1,currenty)
+			term.write("CODE: "..x.idcCODE)
+			buttonPOS.idcCODE = currenty
+			currenty = currenty+1
+			
+			term.setCursorPos(1,currenty)
+			write("TOGGLE IRIS ")
+			if x.irisClose then
+				term.setBackgroundColor(colors.red)
+			else
+				term.setBackgroundColor(colors.green)
+			end
+			write(" ")
+			term.setBackgroundColor(colors.black)
+			buttonPOS.iris = currenty
+			currenty = currenty+1
+		else
+			buttonPOS.iris = nil
+			buttonPOS.idcCODE = nil
+			buttonPOS.idcEN = nil
 		end
-		term.setTextColor(colors.red)
-		term.setCursorPos(1,1)
-		write("ERROR 2")
-		term.setCursorPos(1,2)
-		write("Stargate not Ready!")
-		buttonPOS = {refresh=1}
-		return
-	end
-	typeCode = x.group
-	gateAddr = x.addr
-	targetAddr = x.target
-	idcCode = x.idcCODE
-	payloadAddr = x.payloadAddr
-	payloadData = x.payloadData
-    term.setTextColor(gateColor)
-    term.setBackgroundColor(colors.black)
-    for i=1,ysize-3 do
-        term.setCursorPos(1,i)
-        write(string.rep(" ",xsize-11))
-    end
-    local currenty = 1
-    if x.irisPresent then
-        term.setCursorPos(1,currenty)
-        term.setTextColor(colors.black)
-        term.setBackgroundColor(gateColor)
-        term.write("IRIS CONTROLS")
-        term.setTextColor(gateColor)
-        term.setBackgroundColor(colors.black)
-        currenty = currenty+1
-        
-        term.setCursorPos(1,currenty)
-        term.write("IDC ENABLE ")
-        if x.idcEN then
-            term.setBackgroundColor(colors.green)
-        else
-            term.setBackgroundColor(colors.red)
-        end
-        write(" ")
-        term.setBackgroundColor(colors.black)
-        buttonPOS.idcEN = currenty
-        currenty = currenty+1
-        
-        term.setCursorPos(1,currenty)
-        term.write("CODE: "..x.idcCODE)
-        buttonPOS.idcCODE = currenty
-        currenty = currenty+1
-        
-        term.setCursorPos(1,currenty)
-        write("TOGGLE IRIS ")
-        if x.irisClose then
-            term.setBackgroundColor(colors.red)
-        else
-            term.setBackgroundColor(colors.green)
-        end
-        write(" ")
-        term.setBackgroundColor(colors.black)
-        buttonPOS.iris = currenty
-        currenty = currenty+1
-    else
-        buttonPOS.iris = nil
-        buttonPOS.idcCODE = nil
-        buttonPOS.idcEN = nil
-    end
-    term.setCursorPos(1,currenty)
-    
-    term.setTextColor(colors.black)
-    term.setBackgroundColor(gateColor)
-    write("STARGATE CONTROLS")
-    term.setTextColor(gateColor)
-    term.setBackgroundColor(colors.black)
-    currenty=currenty+1
-    
-    term.setCursorPos(1,currenty)
-    write("TARGET ADDR: "..string.sub(x.target,1,6))
-	term.setTextColor(colors.green)
-	write(string.sub(x.target,7,-1))
-	term.setTextColor(gateColor)
-    buttonPOS.addr = currenty
-    currenty = currenty+1
-    
-    if not x.active then
-        term.setCursorPos(1,currenty)
-        write("DIAL NORMALLY")
-        buttonPOS.dialNORM = currenty
-        currenty = currenty+1
-        
-        if x.group == "M@" then
-            term.setCursorPos(1,currenty)
-            write("DIAL QUICKLY")
-            buttonPOS.dialFAST = currenty
-            currenty = currenty+1
-        else
-            buttonPOS.dialFAST = nil
-        end
-        
-        term.setCursorPos(1,currenty)
-        write("DIAL INSTANTLY")
-        buttonPOS.dialINST = currenty
-        currenty = currenty+1
-    else
-        buttonPOS.dialNORM = nil
-        buttonPOS.dialFAST = nil
-        buttonPOS.dialINST = nil
-    end
-    if x.closeable then
-        term.setCursorPos(1,currenty)
-        write("CLOSE WORMHOLE")
-        buttonPOS.closeWH = currenty
-        currenty = currenty+1
-    else
-        buttonPOS.closeWH = nil
-    end
-    if x.cancelable then
-        term.setCursorPos(1,currenty)
-        write("CANCEL DIAL")
-        buttonPOS.cancel = currenty
-        currenty = currenty+1
-    else
-        buttonPOS.cancel = nil
-    end
-    if x.gdo then
-        term.setCursorPos(1,currenty)
-        write("SEND GDO CODE")
-        buttonPOS.gdo = currenty
-        currenty = currenty+1
-    else
-        buttonPOS.gdo = nil
-    end
-	
-	if arg then
 		term.setCursorPos(1,currenty)
+		
 		term.setTextColor(colors.black)
 		term.setBackgroundColor(gateColor)
-		write("IDC PAYLOAD UNIT")
+		write("STARGATE CONTROLS")
 		term.setTextColor(gateColor)
 		term.setBackgroundColor(colors.black)
-		currenty = currenty+1
+		currenty=currenty+1
 		
 		term.setCursorPos(1,currenty)
-		write("TARGET ADDR: "..string.sub(x.payloadAddr,1,6))
+		write("TARGET ADDR: "..string.sub(x.target,1,6))
 		term.setTextColor(colors.green)
-		write(string.sub(x.payloadAddr,7,8))
+		write(string.sub(x.target,7,-1))
 		term.setTextColor(gateColor)
-		buttonPOS.payloadAddr = currenty
-		currenty = currenty+1
-		
-		term.setCursorPos(1,currenty)
-		write("PAYLOAD DAT: "..string.sub(x.payloadData,1,6))
-		term.setTextColor(colors.green)
-		write(string.sub(x.payloadData,7,8))
-		term.setTextColor(gateColor)
-		buttonPOS.payloadData = currenty
+		buttonPOS.addr = currenty
 		currenty = currenty+1
 		
 		if not x.active then
 			term.setCursorPos(1,currenty)
-			write("SEND PAYLOAD")
-			term.setTextColor(gateColor)
-			buttonPOS.sendPayload = currenty
+			write("DIAL NORMALLY")
+			buttonPOS.dialNORM = currenty
+			currenty = currenty+1
+			
+			if x.group == "M@" then
+				term.setCursorPos(1,currenty)
+				write("DIAL QUICKLY")
+				buttonPOS.dialFAST = currenty
+				currenty = currenty+1
+			else
+				buttonPOS.dialFAST = nil
+			end
+			
+			term.setCursorPos(1,currenty)
+			write("DIAL INSTANTLY")
+			buttonPOS.dialINST = currenty
 			currenty = currenty+1
 		else
+			buttonPOS.dialNORM = nil
+			buttonPOS.dialFAST = nil
+			buttonPOS.dialINST = nil
+		end
+		if x.closeable then
+			term.setCursorPos(1,currenty)
+			write("CLOSE WORMHOLE")
+			buttonPOS.closeWH = currenty
+			currenty = currenty+1
+		else
+			buttonPOS.closeWH = nil
+		end
+		if x.cancelable then
+			term.setCursorPos(1,currenty)
+			write("CANCEL DIAL")
+			buttonPOS.cancel = currenty
+			currenty = currenty+1
+		else
+			buttonPOS.cancel = nil
+		end
+		if x.gdo then
+			term.setCursorPos(1,currenty)
+			write("SEND GDO CODE")
+			buttonPOS.gdo = currenty
+			currenty = currenty+1
+		else
+			buttonPOS.gdo = nil
+		end
+		
+		if arg and x.payloadAddr then
+			term.setCursorPos(1,currenty)
+			term.setTextColor(colors.black)
+			term.setBackgroundColor(gateColor)
+			write("IDC PAYLOAD UNIT")
+			term.setTextColor(gateColor)
+			term.setBackgroundColor(colors.black)
+			currenty = currenty+1
+			
+			term.setCursorPos(1,currenty)
+			write("TARGET ADDR: "..string.sub(x.payloadAddr,1,6))
+			term.setTextColor(colors.green)
+			write(string.sub(x.payloadAddr,7,8))
+			term.setTextColor(gateColor)
+			buttonPOS.payloadAddr = currenty
+			currenty = currenty+1
+			
+			term.setCursorPos(1,currenty)
+			write("PAYLOAD DAT: "..string.sub(x.payloadData,1,6))
+			term.setTextColor(colors.green)
+			write(string.sub(x.payloadData,7,8))
+			term.setTextColor(gateColor)
+			buttonPOS.payloadData = currenty
+			currenty = currenty+1
+			
+			if not x.active then
+				term.setCursorPos(1,currenty)
+				write("SEND PAYLOAD")
+				term.setTextColor(gateColor)
+				buttonPOS.sendPayload = currenty
+				currenty = currenty+1
+			else
+				buttonPOS.sendPayload = nil
+			end
+		else
+			buttonPOS.payloadAddr = nil
+			buttonPOS.payloadData = nil
 			buttonPOS.sendPayload = nil
 		end
-	else
-		buttonPOS.payloadAddr = nil
-		buttonPOS.payloadData = nil
-		buttonPOS.sendPayload = nil
-	end
-	
-    term.setCursorPos(1,currenty)
-    term.setTextColor(colors.black)
-    term.setBackgroundColor(gateColor)
-    write("GATE INFORMATION")
-    term.setTextColor(gateColor)
-    term.setBackgroundColor(colors.black)
-    currenty = currenty+1
-    term.setCursorPos(1,currenty)
-    write("GATE ADDRESS: "..x.addr)
-    term.setTextColor(colors.green)
-	write(x.group)
-    term.setTextColor(gateColor)
-    currenty = currenty+1
-	if x.dialedAddr ~= "" then
+		
 		term.setCursorPos(1,currenty)
-		write("DIALED ADDR: "..string.sub(x.dialedAddr,1,6))
+		term.setTextColor(colors.black)
+		term.setBackgroundColor(gateColor)
+		write("GATE INFORMATION")
+		term.setTextColor(gateColor)
+		term.setBackgroundColor(colors.black)
+		currenty = currenty+1
+		term.setCursorPos(1,currenty)
+		write("GATE ADDRESS: "..x.addr)
 		term.setTextColor(colors.green)
-		write(string.sub(x.dialedAddr,7,-1))
+		write(x.group)
 		term.setTextColor(gateColor)
 		currenty = currenty+1
-	end
+		if x.dialedAddr ~= "" then
+			term.setCursorPos(1,currenty)
+			write("DIALED ADDR: "..string.sub(x.dialedAddr,1,6))
+			term.setTextColor(colors.green)
+			write(string.sub(x.dialedAddr,7,-1))
+			term.setTextColor(gateColor)
+			currenty = currenty+1
+		end
+	end	
 end
 
-function sendCMD(id,param)
+function sendCMD(id,param,slot)
     out = "-"
+	if not slot then slot = tostring(activeSlot) end
     if type(param)=="boolean" then
         if param then 
             out = "T"
@@ -325,7 +383,7 @@ function sendCMD(id,param)
     elseif param then
         out = param
     end
-    ws.send(id..out)
+    ws.send(slot..id..out)
 end
 
 function parseButton(name,id)
@@ -476,7 +534,7 @@ function mouseHandle(x,y)
         elseif parseButton("addr",y) then
             spawnMonitor("ADDR")
         elseif parseButton("refresh",y) then
-            sendCMD("0")
+            sendCMD("0",nil,"0")
         elseif parseButton("dialNORM",y) then
             sendCMD("1")
         elseif parseButton("dialFAST",y) then
@@ -500,7 +558,10 @@ function mouseHandle(x,y)
         if y < 2 then
             apiRequest()
             return 
-        end
+        elseif y > ysize-3 then
+			activeSlot = y-(ysize-3)
+			sendCMD("0",nil,"0")
+		end
         local addr = addrBK[y-1]
         if addr then
 			if string.sub(addr,7,8) == typeCode then
@@ -528,7 +589,7 @@ while running do
         ysize = ysize2
 		monitor.setBackgroundColor(colors.black)
 		monitor.clear()
-        sendCMD("0")
+        sendCMD("0",nil,"0")
         apiRequest()
     end
     redrawMonitor()
@@ -552,6 +613,9 @@ while running do
         term.clear()
         term.setCursorPos(1,1)
         term.setPaletteColor(gateColor,term.nativePaletteColor(gateColor))
+		for i=1,3 do
+			term.setPaletteColor(slotColors[i],term.nativePaletteColor(slotColors[i]))
+		end
 		term.setPaletteColor(colors.green,term.nativePaletteColor(colors.green))
 		term.setPaletteColor(colors.red,term.nativePaletteColor(colors.red))
 		term.setPaletteColor(colors.yellow,term.nativePaletteColor(colors.yellow))
