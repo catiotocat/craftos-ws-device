@@ -12,7 +12,10 @@ if not ws then
     printError(err) 
 	print("Attempting to connect through Heroku!")
 	ws,err = http.websocket("wss://catio-server-086c2c9f15ae.herokuapp.com/")
-    return
+	if not ws then
+		printError(err)
+		return
+	end
     -- ws = {send = function() end}
 end
 -- pastebin get bkdkje8x resoniteLink.lua
