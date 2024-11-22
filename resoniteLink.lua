@@ -597,7 +597,7 @@ while running do
     redrawMonitor()
     if dat[1] == "websocket_message" then
 		if dat[3] == "ENTER USER" then
-			ws.send("craftOS")
+			ws.send("resoniteLink.lua")
 		elseif dat[3] == "ENTER KEY" then
 			ws.send(settings.get("resoniteLink.accessKey"))
 		else
