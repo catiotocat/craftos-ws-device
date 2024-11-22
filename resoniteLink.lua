@@ -1,3 +1,5 @@
+settings.define("resoniteLink.accessKey",{description="Access Key for the public server", default = "", type="string"})
+settings.save()
 local gateColor = colors.cyan
 term.setTextColor(gateColor)
 local xsize,ysize = term.getSize()
@@ -594,6 +596,10 @@ while running do
     end
     redrawMonitor()
     if dat[1] == "websocket_message" then
+		if dat[3] == "ENTER USER" then
+			ws.send("craftOS")
+		elseif dat[3] == "ENTER KEY" then
+			ws.send(settings.get("resoniteLink.accessKey"))
         parseWS(dat[3])
     elseif dat[1]=="http_success" then
         parseAPI(dat[3])
