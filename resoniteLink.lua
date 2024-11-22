@@ -600,7 +600,9 @@ while running do
 			ws.send("craftOS")
 		elseif dat[3] == "ENTER KEY" then
 			ws.send(settings.get("resoniteLink.accessKey"))
-        parseWS(dat[3])
+		else
+			parseWS(dat[3])
+		end
     elseif dat[1]=="http_success" then
         parseAPI(dat[3])
     elseif dat[1]=="mouse_click" and not monitorActive then
