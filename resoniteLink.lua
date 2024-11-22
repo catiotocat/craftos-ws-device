@@ -596,9 +596,9 @@ while running do
     end
     redrawMonitor()
     if dat[1] == "websocket_message" then
-		if dat[3] == "ENTER USER" then
+		if dat[3] == "INPUT USER" then
 			ws.send("resoniteLink.lua")
-		elseif dat[3] == "ENTER KEY" then
+		elseif dat[3] == "INPUT KEY" then
 			ws.send(settings.get("resoniteLink.accessKey"))
 		else
 			parseWS(dat[3])
