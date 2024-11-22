@@ -2,9 +2,9 @@ repeat
 term.setTextColor(colors.cyan)
 term.setBackgroundColor(colors.black)
 print("Checking for Updates...")
-local resoniteLink, err1 = http.get("https://raw.githubusercontent.com/catiotocat/craftos-ws-device/refs/heads/main/resoniteLink.lua?test="..math.random(1,12341234))
+local resoniteLink, err1 = http.get("https://raw.githubusercontent.com/catiotocat/craftos-ws-device/refs/heads/main/resoniteLink.lua")
 sleep(1)
-local bootloader, err2 = http.get("https://raw.githubusercontent.com/catiotocat/craftos-ws-device/refs/heads/main/bootloader.lua?test="..math.random(1,12341234))
+local bootloader, err2 = http.get("https://raw.githubusercontent.com/catiotocat/craftos-ws-device/refs/heads/main/bootloader.lua")
 -- pastebin run tUPXJMrn
 if resoniteLink then
 	local rslnk = fs.open("resoniteLink.lua","r")
