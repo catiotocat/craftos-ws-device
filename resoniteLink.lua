@@ -10,6 +10,8 @@ monitorMode = "IDLE"
 local ws, err = http.websocket("ws://catio-Q551LB:8001")
 if not ws then 
     printError(err) 
+	print("Attempting to connect through Heroku!")
+	ws,err = http.websocket("wss://catio-server-086c2c9f15ae.herokuapp.com/")
     return
     -- ws = {send = function() end}
 end
