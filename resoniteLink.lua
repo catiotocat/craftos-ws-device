@@ -490,7 +490,7 @@ function keyParse(key)
         -- periphemu.remove("top")
         monitor.setBackgroundColor(colors.black)
         monitor.clear()
-    elseif key == keys.delete then
+    elseif key == keys.delete or key == 330 then
         monitorActive = false
 		monitor.clear()
         monitor.setCursorBlink(false)
