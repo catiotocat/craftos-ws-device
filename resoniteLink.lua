@@ -147,11 +147,15 @@ function parseWS(json)
 			term.setCursorPos(1,buttonPOS.lastSaved)
 			term.setTextColor(gateColor)
 			term.setBackgroundColor(colors.black)
-			local saveString = tostring(x.min)
-			if #saveString == 1 then
-				saveString = "0"..saveString
+			local lastSave = tostring(x.sec)
+			if #lastSave == 1 then
+				lastSave = "0"..lastSave
 			end
-			write("LAST SAVE: "..saveString..":00    ")
+			lastSave = tostring(x.min)..":"..lastSave
+			if #lastSave == 4 then
+				lastSave = "0"..lastSave
+			end
+			write("LAST SAVE: "..lastSave.."   ")
 		else
 			term.setPaletteColor(slotColors[x.slot],tonumber(x.gateCOL,16))
 			local ypos = ysize-3+x.slot
