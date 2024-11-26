@@ -1,4 +1,6 @@
+settings.define("resoniteLink.accessKey",{description="Access Key for the public server", default = "", type="string"})
 settings.define("resoniteLink.altMode",{description="When true, disables auto-updates, disables local websocket connections, and redirects api requests through the websocket server.", default = false, type="boolean"})
+settings.define("resoniteLink.localOnly",{description="When true, disables connections through Heroku.", default = false, type="boolean"})
 settings.save()
 local args = {...}
 arg = args[1]
