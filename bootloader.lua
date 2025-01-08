@@ -1,5 +1,5 @@
 settings.define("resoniteLink.accessKey",{description="Access Key for the public server", default = "", type="string"})
-settings.define("resoniteLink.websocketMode",(description="Defines which websocket server to connect to. (0): Tries local url first, then tries public. (1): Only connect to the local url. This does not affect the bootloader. (2): Only connect to the public url. This mode requires a valid access key to be set in resoniteLink.accessKey.",default = 0, type="number"))
+settings.define("resoniteLink.websocketMode",{description="Defines which websocket server to connect to. (0): Tries local url first, then tries public. (1): Only connect to the local url. This does not affect the bootloader. (2): Only connect to the public url. This mode requires a valid access key to be set in resoniteLink.accessKey.",default = 0, type="number"})
 settings.define("resoniteLink.altMode",{description="When true, redirects api requests through the websocket server. Only works if resoniteLink.websocketMode is set to 0 or 2. This also causes mode 0 to behave like mode 2.", default = false, type="boolean"})
 settings.define("resoniteLink.allowUpdates",{description="Set to false to disable automatic updates when running bootloader.lua", default = true, type="boolean"})
 settings.save()
@@ -19,7 +19,7 @@ if settings.get("resoniteLink.allowUpdates") then
 		ws.send("bootloader.lua")
 		rawDat = ws.receive()
 		ws.close()
-		local msg,out = pcall(textutils.unserializeJSON(rawDat))
+		local msg,out = pcall(textutils.unserializeJSON,rawDat)
 		if not msg then
 			printError("Unusable Response from Server")
 			print("Update Aborted")
