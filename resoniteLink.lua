@@ -1,6 +1,6 @@
 settings.define("resoniteLink.accessKey",{description="Access Key for the public server", default = "", type="string"})
 settings.define("resoniteLink.altMode",{description="When true, disables auto-updates, disables local websocket connections, and redirects api requests through the websocket server.", default = false, type="boolean"})
-settings.define("resoniteLink.localOnly",{description="When true, disables connections through Heroku.", default = false, type="boolean"})
+settings.define("resoniteLink.localOnly",{description="When true, disables connections through catio.merith.xyz.", default = false, type="boolean"})
 
 settings.save()
 local gateColor = colors.cyan
@@ -10,6 +10,7 @@ addrBK = {}
 buttonPOS = {refresh=1}
 monitorActive = false
 monitorMode = "IDLE"
+print("Connecting to ws://catio-Q551LB:8001/"
 if settings.get("resoniteLink.altMode") then
 	err = "Cannot conect to local websocket in alt mode!"
 else
@@ -18,15 +19,14 @@ end
 if not ws then 
     printError(err) 
 	if settings.get("resoniteLink.localOnly") then return end
-	print("Attempting to connect through Heroku!")
-	ws,err = http.websocket("wss://catio-server-086c2c9f15ae.herokuapp.com/")
+	print("Connecting to wss://catio.merith.xyz/ws/")
+	ws,err = http.websocket("wss://catio.merith.xyz/ws/")
 	if not ws then
 		printError(err)
 		return
 	end
-    -- ws = {send = function() end}
 end
--- pastebin get bkdkje8x resoniteLink.lua
+
 typeCode = "#@"
 gateAddr = "INVALIDGATE"
 targetAddr = ""
