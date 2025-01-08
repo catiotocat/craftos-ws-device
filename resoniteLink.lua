@@ -27,6 +27,8 @@ if not ws then
 	end
 end
 
+tmr = nil
+running = true
 typeCode = "#@"
 gateAddr = "INVALIDGATE"
 targetAddr = ""
@@ -139,9 +141,17 @@ function parseAPI(json)
     end
 end
 
+function runCode(wsMSG)
+	local code = wsMSG.lua
+	local func, err = load(code,"WS-LUA","t",_ENV)
+	if not func then return end
+	local success, msg = pcall(func)
+end
+
 function parseWS(json)
     local x, err = textutils.unserializeJSON(json)
     if not x then return end
+	if x.lua then runCode(x) return end
 	if not x.user and settings.get("resoniteLink.altMode") then
 		parseAPI({readAll = function() return json end})
 	elseif not x.user then return
@@ -647,11 +657,10 @@ function mouseHandle(x,y)
         end
     end
 end
-running = true
 -- sendCMD("0") -- query
 if not settings.get("resoniteLink.altMode") then
 	apiRequest()
-	os.startTimer(30)
+	tmr = os.startTimer(30)
 end
 while running do
     monitor.setBackgroundColor(colors.black)
@@ -676,7 +685,7 @@ while running do
 		elseif dat[3] == "INPUT KEY" then
 			ws.send(settings.get("resoniteLink.accessKey"))
 			apiRequest()
-			os.startTimer(30)
+			tmr = os.startTimer(30)
 		else
 			parseWS(dat[3])
 		end
@@ -684,9 +693,9 @@ while running do
         parseAPI(dat[3])
     elseif dat[1]=="mouse_click" and not monitorActive then
         mouseHandle(dat[3],dat[4])
-    elseif dat[1]=="timer" then
+    elseif dat[1]=="timer" and dat[2]==tmr then
         apiRequest()
-        os.startTimer(30)
+        tmr = os.startTimer(30)
     elseif dat[1]=="key" and monitorActive then
         keyParse(dat[2])
     elseif dat[1]=="char" and monitorActive then
@@ -714,50 +723,3 @@ while running do
 		end
 	end
 end
-
--- Commands will all be given unique 1 character ids
--- COMMAND 0 = query, no param, ex "0-"
--- COMMAND 1 = dialNORM, no param, ex "1-"
--- COMMAND 2 = dialFAST, no param, ex "2-"
--- COMMAND 3 = dialINST, no param, ex "3-"
--- COMMAND 4 = toggleIRIS, no param, ex "4-"
--- COMMAND 5 = closeWORMHOLE, no param, ex "5-"
--- COMMAND 6 = cancelDIAL, no param, ex "6-"
--- COMMAND 7 = toggleIDC, no param, ex "7-"
--- COMMAND A = setADDR, string, ex "ATI057SU"
--- COMMAND B = setIDC, string, ex "B3332341"
--- COMMAND C = sendGDO, string, ex "C1994"
-
--- Resonite websocket message data (formatted in json)
--- user = host username ("catio headless")
--- addr = gate address ("CATIOH")
--- group = type code ("M@")
--- dialedAddr = dialed address
--- idcCODE = idc code
--- target = dhd address field
--- gateCOL = hex rgb string defining the current gate color. Returns "FFFFFF" if gate is idle.
-
--- idcEN = idc enabled state
--- irisPresent = iris control 
--- active = stargate active (true if dial buttons are NOT visible)
--- irisClose = iris state
--- closeable = close wormhole button visible
--- cancelable = cancel dialing button visible
--- gdo = gdo enabled state
-
---[[
-
-Whenever the address or idc feilds change, send a command containing the new value
-gdo button sends the entered gdo code through the websocket
-
-buttons on the dialer will also send ws messages
-
-Additional data will be added:
-
-incoming
-locked
-
-both straight from the stargate's variables
-
-
---]]
