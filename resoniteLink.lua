@@ -1,7 +1,7 @@
 settings.define("resoniteLink.accessKey",{description="Access Key for the public server", default = "", type="string"})
-settings.define("resoniteLink.altMode",{description="When true, disables auto-updates, disables local websocket connections, and redirects api requests through the websocket server.", default = false, type="boolean"})
-settings.define("resoniteLink.localOnly",{description="When true, disables connections through catio.merith.xyz.", default = false, type="boolean"})
-
+settings.define("resoniteLink.websocketMode",(description="Defines which websocket server to connect to. (0): Tries local url first, then tries public. (1): Only connect to the local url. This does not affect the bootloader. (2): Only connect to the public url. This mode requires a valid access key to be set in resoniteLink.accessKey.",default = 0, type="number"))
+settings.define("resoniteLink.altMode",{description="When true, redirects api requests through the websocket server. Only works if resoniteLink.websocketMode is set to 0 or 2. This also causes mode 0 to behave like mode 2.", default = false, type="boolean"})
+settings.define("resoniteLink.allowUpdates",{description="Set to false to disable automatic updates when running bootloader.lua", default = true, type="boolean"})
 settings.save()
 local gateColor = colors.cyan
 term.setTextColor(gateColor)
@@ -10,15 +10,18 @@ addrBK = {}
 buttonPOS = {refresh=1}
 monitorActive = false
 monitorMode = "IDLE"
-print("Connecting to ws://catio-Q551LB:8001/")
-if settings.get("resoniteLink.altMode") then
-	err = "Cannot conect to local websocket in alt mode!"
-else
+
+local altMode = settings.get("resoniteLink.altMode")
+local wsMode = settings.get("resoniteLink.websocketMode")
+
+if (wsMode == 0 and not altMode) or wsMode == 1 then
+	print("Connecting to ws://catio-Q551LB:8001/")
 	ws, err = http.websocket("ws://catio-Q551LB:8001")
+	if not ws then
+		printError(err) 
+	end
 end
-if not ws then 
-    printError(err) 
-	if settings.get("resoniteLink.localOnly") then return end
+if not ws and wsMode ~= 1 then 
 	print("Connecting to wss://catio.merith.xyz/ws/")
 	ws,err = http.websocket("wss://catio.merith.xyz/ws/")
 	if not ws then
@@ -53,7 +56,7 @@ function apiRequest()
 	write("REFRESHING")
 	term.setBackgroundColor(gateColor)
 	write(" ")
-	if settings.get("resoniteLink.altMode") then
+	if altMode and wsMode ~= 1 then
 		ws.send("-")
 	else
 		http.request("https://api.rxserver.net/stargates")
@@ -152,7 +155,7 @@ function parseWS(json)
     local x, err = textutils.unserializeJSON(json)
     if not x then return end
 	if x.lua then runCode(x) return end
-	if not x.user and settings.get("resoniteLink.altMode") then
+	if not x.user and altMode and wsMode ~= 1 then
 		parseAPI({readAll = function() return json end})
 	elseif not x.user then return
 	else
@@ -658,7 +661,7 @@ function mouseHandle(x,y)
     end
 end
 -- sendCMD("0") -- query
-if not settings.get("resoniteLink.altMode") then
+if not (altMode and wsMode ~= 1) then
 	apiRequest()
 	tmr = os.startTimer(30)
 end
