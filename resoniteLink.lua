@@ -10,7 +10,7 @@ addrBK = {}
 buttonPOS = {refresh=1}
 monitorActive = false
 monitorMode = "IDLE"
-print("Connecting to ws://catio-Q551LB:8001/"
+print("Connecting to ws://catio-Q551LB:8001/")
 if settings.get("resoniteLink.altMode") then
 	err = "Cannot conect to local websocket in alt mode!"
 else
