@@ -144,6 +144,7 @@ function parseWS(json)
     if not x then return end
 	if not x.user and settings.get("resoniteLink.altMode") then
 		parseAPI({readAll = function() return json end})
+	elseif not x.user then return end
 	else
 		if not x.slot then x.slot = 1 end
 		if x.user == "catio headless" and not x.gateCOL then
