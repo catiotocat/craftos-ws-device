@@ -16,6 +16,7 @@ if settings.get("resoniteLink.allowUpdates") then
 		printError(err)
 		print("Update Aborted")
 	else
+		sleep(.1)
 		ws.send("bootloader.lua")
 		rawDat = ws.receive()
 		ws.close()
