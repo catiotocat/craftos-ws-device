@@ -19,8 +19,8 @@ if settings.get("resoniteLink.allowUpdates") then
 		ws.send("bootloader.lua")
 		rawDat = ws.receive()
 		ws.close()
-		local msg,out = pcall(textutils.unserializeJSON,rawDat)
-		if not msg then
+		local success,msg = pcall(textutils.unserializeJSON,rawDat)
+		if not (success and msg)  then
 			printError("Unusable Response from Server")
 			print("Update Aborted")
 		else
