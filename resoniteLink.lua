@@ -162,8 +162,8 @@ function parseWS(json)
 			end
 			write("LAST SAVE: "..lastSave.."   ")
 		else
-			term.setPaletteColor(slotColors[x.slot],tonumber(x.gateCOL,16))
 			local ypos = ysize-3+x.slot
+			term.setPaletteColor(slotColors[x.slot],tonumber(x.gateCOL,16))
 			local slotAddress = ""
 			local slotType = ""
 			local slotOpen = false
